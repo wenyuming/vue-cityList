@@ -82,7 +82,7 @@
                 <div v-for="i in cityData">
                     <div class="title">{{i.name}}</div>
                     <ul>
-                        <li v-for="item in i.cities" class="item city-click" :data-name="item.name" :data-id="item.code"><span class="border-1px name" @touchend="touchUp(item)"  @touchstart="chooseCity()">{{item.name}}</span>
+                        <li v-for="item in i.cities" class="item city-click" :data-name="item.name" :data-id="item.code"><span :data-item="JSON.stringify(item)" @touchstart="chooseCity" @touchend="touchUp" class="border-1px name">{{item.name}}</span>
                         </li>
                     </ul>
                 </div>
@@ -104,6 +104,7 @@
     var app = new Vue({
         el: '#app',
         data: {
+            initY: 0,
             origin: 'http://192.168.99.205:800',
             captchaBoxShow: false,
             test: '测试',
@@ -147,15 +148,14 @@
                     v.toastShow = false
                 }, 1500)
             },
-            chooseCity (city) {
-                let v = this
-                v.countTime = 0
-                v.countTimer = setInterval(function(e){v.countTime ++},1)
+            chooseCity (e) {
+                this.initY = e.changedTouches[0].screenY
             },
-            touchUp (item) {
-                let v = this
-                clearInterval(v.countTimer)
-                if (v.countTime < 30) {
+            touchUp (e) {
+                let currentY = e.changedTouches[0].screenY,
+                cha = currentY - this.initY,
+                item = JSON.parse(e.target.dataset.item)
+                if (-10 < cha && cha < 10) {
                     this.isShowCitys = false
                     this.location = item.name
                     this.submit.area_code = item.code
